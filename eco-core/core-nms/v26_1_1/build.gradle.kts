@@ -8,33 +8,27 @@ group = "com.willfp"
 version = rootProject.version
 
 dependencies {
-    implementation("net.kyori:adventure-text-serializer-ansi:4.18.0")
-    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
+    implementation(project(":eco-core:core-nms:v1_21_8", configuration = "shadow"))
+    paperweight.paperDevBundle("26.1.1.build.+")
 }
 
 tasks {
-    build {
-        dependsOn(reobfJar)
-    }
-
-    reobfJar {
-        mustRunAfter(shadowJar)
-    }
-
     shadowJar {
         relocate(
-            "com.willfp.ecoskills.proxy.v1_21_4",
             "com.willfp.ecoskills.proxy.v1_21_8",
+            "com.willfp.ecoskills.proxy.v26_1_1",
         )
+
+        duplicatesStrategy = DuplicatesStrategy.FAIL
     }
 
     compileJava {
-        options.release.set(21)
+        options.release.set(25)
     }
 
     compileKotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 }
