@@ -3,10 +3,11 @@
 package com.willfp.ecoskills.commands
 
 import com.willfp.eco.core.command.impl.Subcommand
+import com.willfp.eco.core.data.forEachSavedProfile
 import com.willfp.ecoskills.api.resetSkills
 import com.willfp.ecoskills.plugin
 import com.willfp.ecoskills.runOwnedIfOnline
-import com.willfp.ecoskills.util.offlinePlayers
+import com.willfp.ecoskills.util.offlinePlayer
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.util.StringUtil
@@ -19,26 +20,29 @@ object CommandReset : Subcommand(
 ) {
 
     override fun onExecute(sender: CommandSender, args: List<String>) {
-        val players = offlinePlayers(args, 0, "invalid-player")
-
-        if (players.size > 1) {
-            sender.sendMessage(plugin.langYml.getMessage("resetting-all-players"))
+        if (args.firstOrNull().equals("all", ignoreCase = true)) {
+            resetAllPlayers(sender)
+            return
         }
 
-        for (player in players) {
-            player.runOwnedIfOnline {
-                player.resetSkills()
+        val player = notifyNull(offlinePlayer(args, 0, "invalid-player"), "invalid-player")
 
-                if (players.size == 1) {
-                    sender.sendMessage(plugin.langYml.getMessage("reset-player"))
-                }
-            }
-        }
+        player.runOwnedIfOnline {
+            player.resetSkills()
 
-        if (players.size > 1) {
-            sender.sendMessage(plugin.langYml.getMessage("reset-all-players"))
-        } else if (players.isEmpty()) {
             sender.sendMessage(plugin.langYml.getMessage("reset-player"))
+        }
+    }
+
+    private fun resetAllPlayers(sender: CommandSender) {
+        sender.sendMessage(plugin.langYml.getMessage("resetting-all-players"))
+
+        forEachSavedProfile(plugin) { uuid ->
+            val player = Bukkit.getOfflinePlayer(uuid)
+
+            player.runOwnedIfOnline { player.resetSkills() }
+        }.thenRun {
+            plugin.scheduler.global().run { sender.sendMessage(plugin.langYml.getMessage("reset-all-players")) }
         }
     }
 

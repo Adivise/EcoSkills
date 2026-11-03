@@ -1,14 +1,14 @@
 package com.willfp.ecoskills.gui.components
 
 import com.willfp.eco.core.cache.EcoCache
+import com.willfp.eco.core.gui.component.LevelComponent
+import com.willfp.eco.core.gui.component.LevelState
 import com.willfp.eco.core.gui.menu.Menu
 import com.willfp.eco.core.items.Items
 import com.willfp.eco.core.items.builder.ItemStackBuilder
 import com.willfp.eco.core.placeholder.context.placeholderContext
 import com.willfp.eco.util.evaluateExpression
 import com.willfp.eco.util.lineWrap
-import com.willfp.ecomponent.components.LevelComponent
-import com.willfp.ecomponent.components.LevelState
 import com.willfp.ecoskills.api.getSkillLevel
 import com.willfp.ecoskills.plugin
 import com.willfp.ecoskills.skills.Skill
@@ -17,9 +17,12 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.math.roundToInt
 import java.time.Duration
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-private val levelItemCache = EcoCache.builder<Int, ItemStack>()
+private data class SkillLevelKey(val player: UUID, val skill: String, val level: Int)
+
+private val levelItemCache = EcoCache.builder<SkillLevelKey, ItemStack>()
     .expireAfterWrite(Duration.ofMillis(plugin.configYml.getInt("gui.cache-ttl").toLong()))
     .build()
 
@@ -34,7 +37,7 @@ class SkillLevelComponent(
     override fun getLevelItem(player: Player, menu: Menu, level: Int, levelState: LevelState): ItemStack {
         val key = levelState.key
 
-        fun item() = levelItemCache.get(player.hashCode() xor skill.hashCode() xor level.hashCode()) {
+        fun item() = levelItemCache.get(SkillLevelKey(player.uniqueId, skill.id, level)) {
             ItemStackBuilder(Items.lookup(plugin.configYml.getString("level-gui.progression-slots.$key.item")))
                 .setDisplayName(
                     plugin.configYml.getString("level-gui.progression-slots.$key.name")
@@ -66,11 +69,6 @@ class SkillLevelComponent(
         }
     }
 
-    override fun getLevelState(player: Player, level: Int): LevelState {
-        return when {
-            level <= player.getSkillLevel(skill) -> LevelState.UNLOCKED
-            level == player.getSkillLevel(skill) + 1 -> LevelState.IN_PROGRESS
-            else -> LevelState.LOCKED
-        }
-    }
+    override fun getLevelState(player: Player, level: Int): LevelState =
+        LevelState.of(level, player.getSkillLevel(skill))
 }

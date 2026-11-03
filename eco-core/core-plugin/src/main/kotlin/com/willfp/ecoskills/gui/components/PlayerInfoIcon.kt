@@ -2,6 +2,8 @@ package com.willfp.ecoskills.gui.components
 
 import com.willfp.eco.core.cache.EcoCache
 import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.eco.core.gui.component.PositionedComponent
+import com.willfp.eco.core.gui.getSlotLocations
 import com.willfp.eco.core.gui.onLeftClick
 import com.willfp.eco.core.gui.slot
 import com.willfp.eco.core.items.builder.SkullBuilder
@@ -15,7 +17,9 @@ import org.bukkit.inventory.meta.SkullMeta
 import java.time.Duration
 import java.util.UUID
 
-private val skullCache = EcoCache.builder<UUID, ItemStack>()
+private data class PlayerInfoKey(val player: UUID, val opensStatMenu: Boolean)
+
+private val skullCache = EcoCache.builder<PlayerInfoKey, ItemStack>()
     .expireAfterWrite(Duration.ofMillis(plugin.configYml.getInt("gui.cache-ttl").toLong()))
     .build()
 
@@ -26,7 +30,7 @@ class PlayerInfoIcon(
     override val isEnabled = config.getBoolOrNull("enabled") ?: true
     private val slot = if (isEnabled) {
         slot({ player, _ ->
-            skullCache.get(player.uniqueId) {
+            skullCache.get(PlayerInfoKey(player.uniqueId, opensStatMenu)) {
                 val skullBuilder = SkullBuilder()
                     .setDisplayName(
                         config.getString("name")
@@ -67,8 +71,7 @@ class PlayerInfoIcon(
         null
     }
 
-    override val row: Int = config.getInt("row")
-    override val column: Int = config.getInt("column")
+    override val locations = config.getSlotLocations()
 
     override fun getSlotAt(row: Int, column: Int) = slot
 }

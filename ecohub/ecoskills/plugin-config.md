@@ -5,17 +5,13 @@ sidebar_position: 7
 
 This is the main config for EcoSkills, found at `/plugins/EcoSkills/config.yml`. It controls storage, the skills and stats GUIs, the level progression GUI, the persistent action bar, damage indicators, and how XP gain and level-ups are announced. Edit it, then run `/ecoskills reload` to apply most changes.
 
-:::warning
-Toggling the leaderboard (`leaderboard.enabled`) needs a full server restart, not a reload. A reload alone will leave the old state in place.
-:::
-
 ## Default config.yml
 
 ```yaml
 use-local-storage: false # Force local storage even when eco uses a database; disables cross-server sync
 
 leaderboard:
-  enabled: true # Whether the top leaderboard is active; toggling this needs a full server restart
+  enabled: true # Whether the top leaderboard is active
   cache-lifetime: 60 # Lifetime of the leaderboard cache, in seconds
 
 disabled-in-worlds: # Worlds EcoSkills is fully disabled in
@@ -43,6 +39,7 @@ gui:
   player-info: # The player summary icon at the top of the GUI
     row: 1
     column: 5
+    locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
     enabled: true # Whether the summary icon is shown
     name: "&f%player%&f's &fStats:" # Icon title
     lore: # Icon lore; uses ecoskills placeholders for live stat values
@@ -89,6 +86,7 @@ gui:
     location:
       row: 6
       column: 5
+    locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
   custom-slots: [ ] # Extra GUI slots; see https://plugins.auxilor.io/all-plugins/custom-gui-slots
 
@@ -110,6 +108,7 @@ stats-gui:
   player-info:
     row: 1
     column: 5
+    locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
   stat-icon: # The per-stat icon in the /stats GUI
     name: "%stat%"
@@ -124,6 +123,7 @@ stats-gui:
     location:
       row: 6
       column: 4
+    locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
   close:
     enabled: true
@@ -132,6 +132,7 @@ stats-gui:
     location:
       row: 6
       column: 5
+    locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
   custom-slots: [ ] # Extra GUI slots; see https://plugins.auxilor.io/all-plugins/custom-gui-slots
 
@@ -166,6 +167,7 @@ level-gui:
       location:
         row: 6
         column: 4
+      locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
     next-page:
       material: arrow
@@ -173,6 +175,7 @@ level-gui:
       location:
         row: 6
         column: 6
+      locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
     close:
       enabled: true
@@ -181,6 +184,7 @@ level-gui:
       location:
         row: 6
         column: 5
+      locations: [ ] # Optional list of row/column slots; if set, the button shows in each of them instead of row/column
 
     unlocked: # Node style for a reached level
       item: lime_stained_glass_pane

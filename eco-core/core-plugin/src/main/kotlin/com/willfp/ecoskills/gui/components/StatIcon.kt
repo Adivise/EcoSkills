@@ -2,6 +2,8 @@ package com.willfp.ecoskills.gui.components
 
 import com.willfp.eco.core.cache.EcoCache
 import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.eco.core.gui.component.PositionedComponent
+import com.willfp.eco.core.gui.getSlotLocations
 import com.willfp.eco.core.gui.slot
 import com.willfp.eco.core.items.Items
 import com.willfp.eco.core.items.builder.modify
@@ -11,8 +13,11 @@ import com.willfp.ecoskills.plugin
 import com.willfp.ecoskills.stats.Stat
 import org.bukkit.inventory.ItemStack
 import java.time.Duration
+import java.util.UUID
 
-private val itemCache = EcoCache.builder<Int, ItemStack>()
+private data class StatIconKey(val player: UUID, val stat: String)
+
+private val itemCache = EcoCache.builder<StatIconKey, ItemStack>()
     .expireAfterWrite(Duration.ofMillis(plugin.configYml.getInt("gui.cache-ttl").toLong()))
     .build()
 
@@ -23,7 +28,7 @@ class StatIcon(
     private val baseIcon = Items.lookup(config.getString("icon")).item
 
     private val slot = slot { player, _ ->
-        itemCache.get(player.hashCode() xor stat.hashCode()) {
+        itemCache.get(StatIconKey(player.uniqueId, stat.id)) {
             val level = player.getStatLevel(stat)
 
             baseIcon.clone().modify {
@@ -44,8 +49,7 @@ class StatIcon(
     }
 
     override val isEnabled = config.getBoolOrNull("enabled") ?: true
-    override val row = config.getInt("position.row")
-    override val column = config.getInt("position.column")
+    override val locations = config.getSlotLocations("position")
 
     override fun getSlotAt(row: Int, column: Int) = slot
 }
